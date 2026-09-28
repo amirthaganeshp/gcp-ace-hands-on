@@ -1,0 +1,16 @@
+# A three-node cluster: one control plane, two workers.
+#
+# One node is enough to run things and useless for showing SCHEDULING,
+# which is half of what Kubernetes does. Two workers means a pod can land
+# on either, a node can be cordoned, and "where did it go" has an answer.
+#
+# On GKE you never write this file. Google runs the control plane, and you
+# describe node pools instead - which is exactly the difference the README
+# is about.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: ace-lab
+nodes:
+  - role: control-plane
+  - role: worker
+  - role: worker

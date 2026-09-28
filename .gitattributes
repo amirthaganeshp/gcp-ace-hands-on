@@ -1,2 +1,22 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Normalise line endings in the repository to LF.
+#
+# core.autocrlf=true on Windows would otherwise check SHELL SCRIPTS out with
+# CRLF, and bash does not tolerate that: the carriage return becomes part of
+# the last argument on every line, so a script fails with
+#
+#     $'\r': command not found
+#
+# which points at nothing useful. Forcing LF for .sh is the fix; the rest is
+# consistency.
+* text=auto eol=lf
+
+*.sh   text eol=lf
+*.py   text eol=lf
+*.md   text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
+
+# Binary - never touch these.
+*.png  binary
+*.jpg  binary
+*.pdf  binary

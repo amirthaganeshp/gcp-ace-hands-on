@@ -1,0 +1,81 @@
+MIT License
+
+Copyright (c) 2026 Amirtha Ganesh Pugazhendhi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+ON DATA
+
+This repository downloads no datasets and contains none. Everything it prints
+is one of three things: arithmetic over published rates, a model defined and
+labelled in the script that uses it, or - in 04_kubernetes - a measurement
+taken from a Kubernetes cluster running on your own machine. No third-party
+dataset licence applies to anything here.
+
+ON SOFTWARE FETCHED AT RUNTIME
+
+Nothing below is vendored in this repository. Each keeps its own licence, and
+each is fetched from its publisher when you choose to run the thing that needs
+it.
+
+  PYTHON PACKAGES, via pip from requirements.txt
+    matplotlib   (Matplotlib licence, BSD-compatible)
+    numpy        (BSD 3-Clause)
+
+  04_kubernetes/setup/install_kind.sh  DOWNLOADS, checksum-verified:
+    kind         (Apache License 2.0) from github.com/kubernetes-sigs/kind
+    kubectl      (Apache License 2.0) from dl.k8s.io
+    Both versions are resolved at run time rather than pinned here.
+
+  04_kubernetes/setup/install_docker_wsl.sh  ADDS Docker's apt repository
+  and installs:
+    Docker Engine and the compose/buildx plugins (Apache License 2.0)
+    from download.docker.com. The script installs it; it does not
+    redistribute it.
+
+  04_kubernetes/kubernetes_live.py  causes CONTAINER IMAGES to be pulled:
+    kindest/node       - a node image containing Kubernetes and containerd
+                         (Apache License 2.0)
+    nginx:1.27-alpine  - nginx (BSD 2-Clause) packaged as a Docker Official
+                         Image, which carries its own terms
+
+ON TOOLS THIS REPOSITORY DOES NOT USE
+
+Two are worth stating plainly, because their names appear throughout and
+their absence is deliberate:
+
+  TERRAFORM is never invoked. 09_iac implements the documented graph
+  ordering, three-way diff and force-new cascade rules itself, so that
+  section runs with no Terraform binary and no credentials.
+
+  THE GOOGLE CLOUD SDK (gcloud) is never called. Every result in this
+  repository is computed locally. gcloud is documented - extensively, in
+  99_reference/CLI_REFERENCE.md - and running any of those commands against
+  a project of your own is your business, under Google's terms, not this
+  repository's.
+
+ON WHAT THE NUMBERS ARE WORTH
+
+Prices, quotas, discount rates and permission counts in this repository are
+REPRESENTATIVE MODELS, labelled as such where they appear. They are chosen so
+the shape of a decision is visible, and they move. Nothing here is a quote,
+and no part of it is a substitute for Google's own pricing calculator or
+documentation.

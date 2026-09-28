@@ -1,0 +1,126 @@
+name: CI
+
+# Three jobs, because they fail for different reasons and you want to know
+# which one broke:
+#
+#   checks      - the repo describes itself accurately (fast, no deps)
+#   parts       - every runnable part actually runs (needs pip install)
+#   kubernetes  - a REAL kind cluster comes up and 04 passes against it
+#
+# `kubernetes` is the slow one and the one most likely to be flaky, since it
+# creates a Kubernetes cluster from scratch. It is kept separate so a
+# transient failure there does not hide a genuine failure in `parts`.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    name: Repo consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # These two import only the standard library, on purpose, so they run
+      # before anything is installed - which is also how a human first meets
+      # this repo.
+      - name: Relative links resolve
+        run: python .github/scripts/check_links.py
+
+      - name: Reference describes what is here
+        run: python 99_reference/check_reference.py
+
+  parts:
+    name: Every part runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Environment check
+        # 04_kubernetes is expected to report blocked in this job - there is
+        # no cluster here. The `kubernetes` job is where it runs.
+        run: python 00_setup/check_env.py || true
+
+      - name: Run the parts that need no cluster
+        run: |
+          set -euo pipefail
+          for script in \
+            01_resource_hierarchy/hierarchy_and_policy.py \
+            02_iam/iam_hierarchy.py \
+            03_compute/compute_spectrum.py \
+            05_storage/storage_and_databases.py \
+            06_networking/vpc_and_firewall.py \
+            07_operations/operations.py \
+            08_billing_cost/billing_and_cost.py \
+            09_iac/iac_and_state.py \
+            10_capstone_summary/capstone.py
+          do
+            echo "::group::$script"
+            python "$script"
+            echo "::endgroup::"
+          done
+
+      - name: Every part produced its figure
+        run: |
+          set -euo pipefail
+          missing=0
+          for f in 01_resource_hierarchy 02_iam 03_compute 05_storage \
+                   06_networking 07_operations 08_billing_cost 09_iac \
+                   10_capstone_summary
+          do
+            if ! ls "$f"/images/*.png >/dev/null 2>&1; then
+              echo "no figure produced by $f"; missing=1
+            fi
+          done
+          exit $missing
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: figures
+          path: "*/images/*.png"
+          if-no-files-found: error
+
+  kubernetes:
+    name: Real cluster
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      # The SAME script a human runs. If it rots, CI notices before they do.
+      - name: Install kind and kubectl
+        run: |
+          bash 04_kubernetes/setup/install_kind.sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Versions
+        run: |
+          docker --version
+          kind version
+          kubectl version --client
+
+      - name: Run 04_kubernetes against a real cluster
+        run: python 04_kubernetes/kubernetes_live.py
+
+      - name: Tear the cluster down
+        if: always()
+        run: kind delete cluster --name ace-lab || true
