@@ -1,7 +1,7 @@
 # Associate Cloud Engineer, hands on
 
 A runnable companion for the Google Cloud **Associate Cloud Engineer** exam, built on the same
-conventions as the companion `gcloud_learning_PDE` and `gcloud_learning_MLE` repositories: every
+conventions as the companion [`gcp-pde-hands-on`](https://github.com/amirthaganeshp/gcp-pde-hands-on) and [`gcp-ml-hands-on`](https://github.com/amirthaganeshp/gcp-ml-hands-on) repositories: every
 claim is either **measured on your machine** or **labelled as documented**, and nothing is
 simulated to look like something it is not.
 
